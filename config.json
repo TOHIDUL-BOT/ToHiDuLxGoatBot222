@@ -40,9 +40,9 @@
   "credentials": {
     "gmailAccount": {
       "email": "botpack12@gmail.com",
-      "clientId": "216634923141-7o2cva8h56mkls4iblulivcrk67kf0ek.apps.googleusercontent.com",
-      "clientSecret": "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",
-      "refreshToken": "1//04wRjelGr1D_mCgYIARAAGAQSNwF-L9IrKB-M45BefZD3Oc0XpITt_uMrhX6nmnGKlYjyqJYXAwps7gIkKeF7dTdeOfI9tj-tATQ",
+      "clientId": "216634923141-5nuditvuc6dh87iek0tsv8hlqrv280i8.apps.googleusercontent.com",
+      "clientSecret": "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",
+      "refreshToken": "1//04TmM-Xj4em6uCgYIARAAGAQSNwF-L9IrdjpdIfuGp2CTGCO44pcYRM0KOm49n3IpteSLj_sgI7ZRLfK8gP85rVZqgu4GFwhfNRQ",
       "apiKey": ""
     },
     "gRecaptcha": {
