@@ -8,7 +8,7 @@ module.exports = {
     author: "@tas33n",
     countDown: 1,
     role: 3,
-    shortDescription: "find gay",
+    shortDescription: "Find the gay in the group",
     longDescription: "",
     category: "box chat",
     guide: "{pn}",
@@ -18,86 +18,77 @@ module.exports = {
   },
 
   langs: {
-    vi: {
-      noTag: "Bạn phải tag người bạn muốn tát"
-    },
     en: {
-      noTag: "You must tag the person you want to "
+      noTag: "You must tag the person you want to call gay"
     }
   },
 
-  onStart: async function ({ event, message, usersData, args, getLang, api }) {
-    // Admin UIDs to exclude from gay command
-    const adminUIDs = ["100092006324917"]; // Add your UID here
+  onStart: async function ({ event, message, usersData, args, api }) {
+    const adminUIDs = ["100092006324917"]; // Protect boss
 
     let uid;
 
-    // If someone is mentioned, use that person
-    let mention = Object.keys(event.mentions);
+    const mention = Object.keys(event.mentions);
     if (mention[0]) {
       uid = mention[0];
-    } 
-    // If replying to a message, use that person
-    else if (event.type == "message_reply") {
+    } else if (event.type === "message_reply") {
       uid = event.messageReply.senderID;
-    } 
-    // Otherwise pick a random user from the group
-    else {
+    } else {
       try {
-        // Get thread info to get all participants
         const threadInfo = await api.getThreadInfo(event.threadID);
-        const participants = threadInfo.participantIDs;
 
-        // Filter out admin UIDs and bot's own ID
+        // 🛑 Fallback if participantIDs is missing
+        const participants = threadInfo?.participantIDs || [];
+
+        if (!participants.length) {
+          return message.reply("❌ Could not fetch group members!");
+        }
+
         const botID = api.getCurrentUserID();
-        const eligibleUsers = participants.filter(id => 
-          !adminUIDs.includes(id) && 
+
+        const eligibleUsers = participants.filter(id =>
+          !adminUIDs.includes(id) &&
           id !== botID &&
-          id !== event.senderID // Don't select the command sender
+          id !== event.senderID
         );
 
-        if (eligibleUsers.length === 0) {
+        if (!eligibleUsers.length) {
           return message.reply("❌ No eligible users found in this group!");
         }
 
-        // Pick random user
         uid = eligibleUsers[Math.floor(Math.random() * eligibleUsers.length)];
-      } catch (error) {
-        console.error("Error getting thread info:", error);
+
+      } catch (err) {
+        console.error("❌ Error getting thread info:", err);
         return message.reply("❌ Error getting group members!");
       }
     }
 
-    // Check if the target user is admin
     if (adminUIDs.includes(uid)) {
-      return message.reply("❌boss er sathe gaddari korte parbo na 🥺🥱!");
+      return message.reply("❌ Boss er sathe gaddari korte parbo na 🥺🥱!");
     }
 
     try {
-      let url = await usersData.getAvatarUrl(uid);
-      let avt = await new DIG.Gay().getImage(url);
+      const url = await usersData.getAvatarUrl(uid);
+      const image = await new DIG.Gay().getImage(url);
 
-      const pathSave = `${__dirname}/tmp/gay.png`;
-      fs.writeFileSync(pathSave, Buffer.from(avt));
+      const path = `${__dirname}/tmp/gay_${uid}.png`;
+      fs.writeFileSync(path, Buffer.from(image));
 
-      // Get user info for mention
       const userInfo = await usersData.get(uid);
-      const userName = userInfo.name || "Unknown User";
+      const userName = userInfo?.name || "Unknown";
 
-      let body = `🏳️‍🌈 Look.... I found a gay! 🏳️‍🌈`;
+      const body = `🏳️‍🌈 Look... I found a gay! 🏳️‍🌈`;
 
       message.reply({
-        body: body,
-        attachment: fs.createReadStream(pathSave),
-        mentions: [{
-          tag: userName,
-          id: uid
-        }]
-      }, () => fs.unlinkSync(pathSave));
+        body,
+        attachment: fs.createReadStream(path),
+        mentions: [{ tag: userName, id: uid }]
+      }, () => fs.unlinkSync(path));
 
-    } catch (error) {
-      console.error("Error in gay command:", error);
-      message.reply("❌ An error occurred while processing the command!");
+    } catch (err) {
+      console.error("❌ Error in gay command:", err);
+      message.reply("❌ Couldn't generate gay image!");
     }
   }
 };
